@@ -1,0 +1,113 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <title>Teacher Side</title>
+    <style>
+        h1 {
+          text-align: center;
+          margin-top: 30px;
+        }
+
+        #room-code {
+          text-align: center;
+          font-size: 50px;
+          margin-top: 50px;
+        }
+
+        .progress {
+          width: 50%;
+          margin: auto;
+          margin-top: 50px;
+        }
+
+        body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          background-color: #8ABD91;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to the Teacher's Side of <%= rooms %></h1>
+
+    <div id="room-code"></div>
+
+    <div class="progress">
+      <div id="myBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      
+      var socket = io('/admin');
+
+      const room = '<%= rooms %>'
+      const progressBar = document.getElementById("myBar");
+      const button = document.getElementById('signal')
+
+      function createStudentRoom()
+      {
+        // Make student code for students to join, also used as name for student room
+        var code = Math.floor(Math.random() * 1000000);
+        code = code.toString().padStart(6, '0');
+        code = room + code;
+        return code;
+      }
+
+      const roomCode = createStudentRoom();
+      const link = document.createElement('a');
+      link.href = '/student?code=' + roomCode;
+      link.innerHTML = roomCode;
+      document.getElementById('room-code').appendChild(link);
+
+      socket.on('connect', function(){
+        socket.emit('join', {room});
+      })
+
+      socket.on('student join', function(confused, connected) {
+        const conf = confused;
+        const conn = connected;
+        counter_val = conf/conn*100;
+        console.log(conf, conn)
+        console.log(counter_val)
+        progressBar.style.width = `${counter_val.toFixed(0)}%`;
+      });
+
+      socket.on('clicked', function(confused, connected) {
+        const conf = confused;
+        const conn = connected;
+        counter_val = conf/conn*100;
+        console.log(conf, conn)
+        console.log(counter_val)
+        progressBar.style.width = `${counter_val.toFixed(0)}%`;
+      });
+
+      socket.on('unclicked', function(confused, connected) {
+        const conf = confused;
+        const conn = connected;
+        counter_val = conf/conn*100;
+        console.log(conf, conn)
+        console.log(counter_val)
+        progressBar.style.width = `${counter_val.toFixed(0)}%`;
+      });
+
+      socket.on('student unjoin', function(confused, connected) {
+        const conf = confused;
+        const conn = connected;
+        counter_val = conf/conn*100;
+        console.log(conf, conn)
+        console.log(counter_val)
+        progressBar.style.width = `${counter_val.toFixed(0)}%`;
+      });
+
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</body>
+</html>
